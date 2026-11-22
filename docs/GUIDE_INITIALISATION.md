@@ -43,18 +43,34 @@ Ou appeler directement `.venv\Scripts\python.exe` sans activer le venv.
 
 ## 3. Backend USB (étape manuelle critique)
 
-1. Télécharger l'archive officielle sur <https://libusb.info/> (libusb 1.0.x, Windows).
-2. Extraire `libusb-1.0.dll` **x64** (dossier `x64` ou `MS64`).
-3. Copier la DLL dans `.venv\Scripts\` (à côté de `python.exe`).
-4. Vérifier :
+1. Télécharger l'archive officielle sur <https://libusb.info/> (libusb 1.0.x, Windows, archive `.7z`).
+2. Extraire `libusb-1.0.dll` **x64** : `VS2019\MS64\dll\libusb-1.0.dll` (ou `VS2022\MS64\dll\`, équivalent x64).
+3. Copier la DLL dans **deux** dossiers :
+
+   - `.venv\Scripts\libusb-1.0.dll` (pour Optima) ;
+   - `.venv-mtk\Scripts\libusb-1.0.dll` (pour mtkclient, qui tourne dans son propre venv).
+
+4. **Note** : si `.venv-mtk/` n'existe pas encore, faire la section 3 après l'installation de mtkclient au prompt 3.3.
+5. Vérifier :
 
 ```powershell
-python -c "import usb.core; print(usb.core.find(find_all=True))"
+.\.venv\Scripts\python.exe -c "from src.adapters.usb.drivers import check_backend; print(check_backend())"
+.\.venv\Scripts\python.exe -c "import usb.core; print(list(usb.core.find(find_all=True)))"
+.\.venv-mtk\Scripts\python.exe -c "import usb.core; print(list(usb.core.find(find_all=True)))"
 ```
 
-Sortie attendue : `[]` (aucun `NoBackendError`).
+Sortie attendue : `True`, puis une liste (souvent `[]` sans appareil), sans `NoBackendError`.
 
-**Non automatisable** : aucune DLL n'est versionnée dans le dépôt ; aucun téléchargement automatique. Si `NoBackendError` persiste, vérifier que `libusb-1.0.dll` est bien dans `.venv\Scripts\` et qu'elle est x64.
+**Cas Windows** : `ctypes.util.find_library` ne cherche que dans `PATH`. Si `import usb.core` lève encore `NoBackendError` alors que la DLL est bien présente, ajouter un `sitecustomize.py` dans `.venv\Lib\site-packages\` **et** `.venv-mtk\Lib\site-packages\` :
+
+```python
+import os, sys
+d = os.path.dirname(sys.executable)
+os.add_dll_directory(d)
+os.environ["PATH"] = d + os.pathsep + os.environ.get("PATH", "")
+```
+
+**Non automatisable** : aucune DLL n'est versionnée dans le dépôt ; aucun téléchargement automatique. Si `NoBackendError` persiste, vérifier que `libusb-1.0.dll` est bien dans `.venv\Scripts\` et `.venv-mtk\Scripts\`, et qu'elle est x64.
 
 ## 4. Pilotes USB appareils
 
