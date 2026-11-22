@@ -6,6 +6,10 @@
 # binaries:
 #   # Exécutable mtkclient (GPLv3), appelé en sous-processus uniquement.
 #   mtkclient_path: "bin/mtkclient"
+#   # Commande mtkclient complète (argv), isolée dans un venv dédié.
+#   # Chemin relatif au fichier de configuration, ou absolu.
+#   # Ex. venv isolé : [".venv-mtk/Scripts/mtk.exe"]
+#   mtkclient_cmd: [".venv-mtk/Scripts/mtk.exe"]
 #   # Exécutable edl (GPLv3), appelé en sous-processus uniquement.
 #   edl_path: "bin/edl"
 #

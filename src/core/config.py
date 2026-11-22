@@ -32,6 +32,7 @@ DEFAULT_LOGS_DIR = "logs"
 DEFAULT_RAW_DIR = "logs/raw"
 DEFAULT_DB_PATH = "data/optima.db"
 DEFAULT_THEME = "dark"
+DEFAULT_MTKCLIENT_CMD: tuple[str, ...] = ()
 
 
 class ConfigError(Exception):
@@ -52,6 +53,7 @@ class AppConfig:
     raw_dir: Path
     db_path: Path
     theme: str
+    mtkclient_cmd: tuple[str, ...] = DEFAULT_MTKCLIENT_CMD
 
 
 def _locate_config(path: Path | None) -> Path | None:
@@ -110,6 +112,32 @@ def _resolve(base_dir: Path, value: str) -> Path:
     return candidate if candidate.is_absolute() else base_dir / candidate
 
 
+def _string_list(section: Mapping[str, Any], key: str) -> tuple[str, ...]:
+    value = section.get(key)
+    if value is None:
+        return ()
+    if not isinstance(value, list):
+        raise ConfigError(f"Configuration invalide : '{key}' doit être une liste de chaînes.")
+    items: list[str] = []
+    for item in value:
+        if not isinstance(item, str) or not item.strip():
+            raise ConfigError(
+                f"Configuration invalide : '{key}' ne peut contenir que des chaînes non vides."
+            )
+        items.append(item.strip())
+    return tuple(items)
+
+
+def _resolve_cmd(base_dir: Path, cmd: tuple[str, ...]) -> tuple[str, ...]:
+    """Résout le premier élément s'il ressemble à un chemin, laisse le reste intact."""
+    if not cmd:
+        return ()
+    first = Path(cmd[0]).expanduser()
+    if first.is_absolute() or len(first.parts) > 1:
+        return (str(_resolve(base_dir, cmd[0])), *cmd[1:])
+    return cmd
+
+
 def _ensure_directories(config: AppConfig) -> None:
     for directory in (config.logs_dir, config.raw_dir, config.db_path.parent):
         try:
@@ -143,6 +171,7 @@ def load_config(path: Path | None = None) -> AppConfig:
         raw_dir=_resolve(base_dir, _string(paths, "raw_dir", DEFAULT_RAW_DIR)),
         db_path=_resolve(base_dir, _string(paths, "db_path", DEFAULT_DB_PATH)),
         theme=_string(ui, "theme", DEFAULT_THEME),
+        mtkclient_cmd=_resolve_cmd(base_dir, _string_list(binaries, "mtkclient_cmd")),
     )
 
     _ensure_directories(config)

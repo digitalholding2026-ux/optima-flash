@@ -9,8 +9,17 @@ dist/
 
 # Environnements
 .venv/
+.venv-mtk/
 venv/
 env/
+
+# Moteurs GPL isolés (code source de référence, non distribué)
+vendor/
+
+# Binaires (DLL/EXE/PYD) jamais versionnés
+*.dll
+*.exe
+*.pyd
 
 # Données locales
 logs/
