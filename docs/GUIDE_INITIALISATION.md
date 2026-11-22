@@ -18,7 +18,7 @@ Si `py -3.11` n'est pas reconnu, installer Python 3.11.x depuis python.org et co
 ## 2. Clone et installation
 
 ```powershell
-git clone <url-du-depot-optima-flash>
+git clone https://github.com/digitalholding2026-ux/optima-flash.git
 cd optima-flash
 py -3.11 -m venv .venv
 .\.venv\Scripts\Activate.ps1

@@ -35,11 +35,5 @@ Aucune étape manquante après correction.
 
 ## 4. Commit et push
 
-- Commit : `docs: guide d'initialisation pour agent et script de bootstrap` (créé).
-- Remote : aucun (`git remote -v` vide).
-- Push : **en attente de configuration remote**.
-
-```powershell
-git remote add origin <url-du-depot-optima-flash>
-git push -u origin master
-```
+- Remote : `origin` → `https://github.com/digitalholding2026-ux/optima-flash.git`.
+- Push : `git push -u origin master` (remote configuré).
